@@ -1,0 +1,46 @@
+name: Python CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Install poetry
+      run: pipx install poetry
+
+    - uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+        cache: 'poetry'
+
+    - name: Install dependencies
+      run: |
+        poetry install
+
+    - name: Check formatting with Black
+      run: |
+        poetry run black --check .
+
+    - name: Check import sorting with isort
+      run: |
+        poetry run isort --check-only .
+
+    - name: Run tests
+      run: |
+        poetry run pytest
+
+    - name: Run mypy in strict mode
+      run: |
+        poetry run mypy --strict .

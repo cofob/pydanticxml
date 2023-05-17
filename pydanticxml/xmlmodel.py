@@ -1,10 +1,11 @@
-from typing import Any, Callable, Optional, Type, no_type_check
+from typing import Any, Callable, Optional, Type, TypeVar, no_type_check
 from xml.dom.minidom import parseString
 from xml.etree.ElementTree import Element, SubElement, fromstring, tostring
 
 from pydantic import BaseModel
-from pydantic.fields import ModelField
 from pydantic.main import ModelMetaclass
+
+T = TypeVar("T", bound="XMLModel")
 
 
 class XMLModelMeta(ModelMetaclass):
@@ -25,22 +26,7 @@ class XMLModelMeta(ModelMetaclass):
         if xml_name is not None:
             attrs["__xml_name__"] = xml_name
 
-        # A bit of low-level magic to support __xml_content__ attribute
-        # Pydantic without this field will raise an error if we try to set or get __xml_content__ attribute
-        # Because it ignores and not registers automatically `__` (private) attributes
-        c = super().__new__(cls, name, bases, attrs, **kwargs)
-        fields = c.__fields__
-        fields["__xml_content__"] = ModelField(
-            name="__xml_content__",
-            type_=Optional[str],
-            required=False,
-            default=None,
-            model_config=c.__config__,
-            class_validators={},
-        )
-        c.__fields__ = fields
-
-        return c
+        return super().__new__(cls, name, bases, attrs, **kwargs)
 
 
 class XMLModel(BaseModel, metaclass=XMLModelMeta):
@@ -178,7 +164,7 @@ class XMLModel(BaseModel, metaclass=XMLModelMeta):
         return xml_str
 
     @classmethod
-    def fromxml(cls, xml: str):
+    def fromxml(cls: Type[T], xml: str) -> T:
         """Converts XML string to a model.
 
         Args:
@@ -245,4 +231,4 @@ class XMLModel(BaseModel, metaclass=XMLModelMeta):
             return out
 
         root = fromstring(xml)
-        return from_element(root, cls)
+        return from_element(root, cls)  # type: ignore

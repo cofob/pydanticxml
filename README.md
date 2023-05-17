@@ -7,7 +7,7 @@ PydanticXML is a Python library that provides a way to convert Pydantic models t
 You can install PydanticXML with pip:
 
 ```bash
-pip install pydanticxml
+pip install pydantic-xmlmodel
 ```
 
 ## Usage
@@ -15,7 +15,7 @@ pip install pydanticxml
 To use PydanticXML, you need to import the `XMLModel` class from the `pydanticxml` module:
 
 ```python
-from pydanticxml import XMLModel
+from pydantic_xmlmodel import XMLModel
 ```
 
 Here is the class diagram of the library:

@@ -1,6 +1,6 @@
 import pytest
 
-from pydanticxml.xmlmodel import XMLModel
+from pydantic_xmlmodel.xmlmodel import XMLModel
 
 
 class ExampleModel(XMLModel):

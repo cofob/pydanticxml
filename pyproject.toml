@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "pydanticxml"
+version = "0.1.0"
+description = "PydanticXML is a Python library that provides a way to convert Pydantic models to XML and vice versa."
+authors = ["cofob <cofob@riseup.net>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.8,<4.0"
+pydantic = "^1"
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.3.0"
+isort = "^5.12.0"
+mypy = "^1.3.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

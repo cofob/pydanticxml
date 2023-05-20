@@ -1,10 +1,20 @@
+from xml.etree.ElementTree import ParseError
+
 import pytest
+from pydantic import ValidationError
 
 from pydantic_xmlmodel.xmlmodel import XMLModel
 
 
 class ExampleModel(XMLModel):
     __xml_name__ = "example"
+    name: str
+    value: int
+
+
+class ExampleModelWithContent(XMLModel):
+    __xml_name__ = "example"
+    __xml_content__ = "content"
     name: str
     value: int
 
@@ -56,14 +66,6 @@ def test_xml_name() -> None:
     assert "<example" in result
 
 
-# Test the `__xml_content__` attribute
-class ExampleModelWithContent(XMLModel):
-    __xml_name__ = "example"
-    __xml_content__ = "content"
-    name: str
-    value: int
-
-
 def test_xml_content() -> None:
     # Arrange
     model = ExampleModelWithContent(name="test", value=123)
@@ -95,7 +97,7 @@ def test_fromxml_empty_xml() -> None:
     xml = ""
 
     # Act and assert
-    with pytest.raises(Exception):
+    with pytest.raises(ParseError):
         ExampleModel.fromxml(xml)
 
 
@@ -105,7 +107,7 @@ def test_fromxml_missing_attributes() -> None:
     xml = '<example name="test"/>'
 
     # Act and assert
-    with pytest.raises(Exception):
+    with pytest.raises(ValidationError):
         ExampleModel.fromxml(xml)
 
 
@@ -125,13 +127,13 @@ def test_fromxml_extra_attributes() -> None:
 # Test for large XML input
 def test_fromxml_large_input() -> None:
     # Arrange
-    xml = '<example name="{}" value="123"/>'.format("a" * 10000)
+    xml = '<example name="{}" value="123"/>'.format("a" * 100000)
 
     # Act
     model = ExampleModel.fromxml(xml)
 
     # Assert
-    assert model.name == "a" * 10000
+    assert model.name == "a" * 100000
     assert model.value == 123
 
 
@@ -141,5 +143,5 @@ def test_fromxml_special_characters() -> None:
     xml = '<example name="test&test" value="123"/>'
 
     # Act and assert
-    with pytest.raises(Exception):
+    with pytest.raises(ParseError):
         ExampleModel.fromxml(xml)

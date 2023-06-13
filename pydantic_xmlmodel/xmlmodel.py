@@ -215,7 +215,7 @@ class XMLModel(BaseModel, metaclass=XMLModelMeta):
                     )
 
                 # Get the value of the field
-                if xml_name in element.attrib:
+                if xml_name in element.attrib and not issubclass(field_type, BaseModel):
                     data[field] = element.attrib[xml_name]
                 # If the field is a subelement, we convert it to XML recursively
                 else:

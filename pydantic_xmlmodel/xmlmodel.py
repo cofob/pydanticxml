@@ -120,7 +120,7 @@ class XMLModel(BaseModel, metaclass=XMLModelMeta):
             </cat>
         """
 
-        def to_xml(e: Element, obj: Any) -> None:
+        def to_xml_innner(e: Element, obj: Any) -> None:
             """Convert the model to XML recursively."""
             # Iterate over the fields of the model and convert them to XML
             for field, _ in obj.dict().items():
@@ -138,7 +138,7 @@ class XMLModel(BaseModel, metaclass=XMLModelMeta):
                     # Create the XML element and add it to the parent element
                     sub = SubElement(e, name)
                     # Convert the BaseModel to XML recursively
-                    to_xml(sub, value)
+                    to_xml_innner(sub, value)
                 # Else, we add the value as an attribute
                 else:
                     # Get the name of the XML attribute
@@ -156,7 +156,7 @@ class XMLModel(BaseModel, metaclass=XMLModelMeta):
         # Create the root XML element
         root = Element(self._get_xml_name())
         # Convert the model to XML recursively
-        to_xml(root, self)
+        to_xml_innner(root, self)
         # Convert the XML element to string
         xml = parseString(tostring(root, encoding="unicode"))
 

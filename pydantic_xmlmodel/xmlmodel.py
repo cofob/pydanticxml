@@ -150,7 +150,7 @@ class XMLModel(BaseModel, metaclass=XMLModelMeta):
                     # Add the attribute to the XML element
                     e.set(name, str(value))
             # If the model has content, we add it to the XML element
-            if obj.__xml_content__ is not None:
+            if isinstance(obj, XMLModel) and obj.__xml_content__ is not None:
                 e.text = obj.__xml_content__
 
         # Create the root XML element
@@ -205,10 +205,6 @@ class XMLModel(BaseModel, metaclass=XMLModelMeta):
         def from_element(element: Element, model: Type[BaseModel]) -> Any:
             data = {}
             for field in model.__fields__:
-                # We skip the __xml_content__ field because we handle it separately
-                if field == "__xml_content__":
-                    continue
-
                 field_type = model.__annotations__[field]
                 if issubclass(field_type, XMLModel):
                     xml_name = field_type._get_xml_name()

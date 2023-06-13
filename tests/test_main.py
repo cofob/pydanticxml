@@ -1,7 +1,7 @@
 from xml.etree.ElementTree import ParseError
 
 import pytest
-from pydantic import ValidationError
+from pydantic import BaseModel, ValidationError
 
 from pydantic_xmlmodel.xmlmodel import XMLModel
 
@@ -17,6 +17,41 @@ class ExampleModelWithContent(XMLModel):
     __xml_content__ = "content"
     name: str
     value: int
+
+
+class PydanticModel(BaseModel):
+    name: str
+    value: int
+
+
+class ExampleModelWithPydantic(XMLModel):
+    __xml_name__ = "example"
+    value: PydanticModel
+
+
+class ExampleModelLevel2(XMLModel):
+    __xml_name__ = "level2"
+    name: str
+    value: int
+
+
+class ExampleModelLevel1(XMLModel):
+    __xml_name__ = "level1"
+    level2: ExampleModelLevel2
+    value: int
+
+
+class ExampleModelWithMetaXmlName(XMLModel, xml_name="example"):
+    name: str
+    value: int
+
+
+class ExampleModelWithXmlNameFunc(XMLModel):
+    __xml_name_function__ = lambda s: s.upper()
+
+
+class ExampleModelWithXmlNameFuncNone(XMLModel):
+    __xml_name_function__ = None
 
 
 # Test the `to_xml` method
@@ -176,3 +211,122 @@ def test_from_xml_special_characters() -> None:
     # Act and assert
     with pytest.raises(ParseError):
         ExampleModel.from_xml(xml)
+
+
+def test_to_xml_with_indent() -> None:
+    # Arrange
+    model = ExampleModelLevel1(
+        level2=ExampleModelLevel2(name="test", value=123), value=456
+    )
+
+    # Act
+    result = model.to_xml(indent=2)
+    print(result)
+
+    # Assert
+    assert (
+        '<?xml version="1.0" ?>\n'
+        '<level1 value="456">\n'
+        '  <level2 name="test" value="123"/>\n'
+        "</level1>\n"
+    ) == result
+
+
+def test_to_xml_with_level() -> None:
+    # Arrange
+    model = ExampleModelLevel1(
+        level2=ExampleModelLevel2(name="test", value=123), value=456
+    )
+
+    # Act
+    result = model.to_xml()
+
+    # Assert
+    assert (
+        '<?xml version="1.0" ?><level1 value="456"><level2 name="test" value="123"/></level1>'
+        == result
+    )
+
+
+def test_from_xml_with_level() -> None:
+    # Arrange
+    xml = '<?xml version="1.0" ?><level1 value="456"><level2 name="test" value="123"/></level1>'
+
+    # Act
+    model = ExampleModelLevel1.from_xml(xml)
+
+    # Assert
+    assert model.value == 456
+    assert model.level2.name == "test"
+    assert model.level2.value == 123
+
+
+def test_to_xml_with_pydantic_model() -> None:
+    # Arrange
+    model = ExampleModelWithPydantic(value=PydanticModel(name="test", value=123))
+
+    # Act
+    result = model.to_xml()
+
+    # Assert
+    assert (
+        '<?xml version="1.0" ?><example><PydanticModel name="test" value="123"/></example>'
+        == result
+    )
+
+
+# Don't support this yet
+# def test_from_xml_with_pydantic_model() -> None:
+#     # Arrange
+#     xml = '<?xml version="1.0" ?><example><PydanticModel name="test" value="123"/></example>'
+
+#     # Act
+#     model = ExampleModelWithPydantic.from_xml(xml)
+
+#     # Assert
+#     assert model.value.name == "test"
+#     assert model.value.value == 123
+
+
+def test_to_xml_without_xml_version() -> None:
+    # Arrange
+    model = ExampleModel(name="test", value=123)
+
+    # Act
+    result = model.to_xml(include_xml_version=False)
+
+    # Assert
+    assert '<example name="test" value="123"/>' == result
+
+
+def test_to_xml_with_meta_xml_name() -> None:
+    # Arrange
+    model = ExampleModelWithMetaXmlName(name="test", value=123)
+
+    # Act
+    result = model.to_xml()
+
+    # Assert
+    assert '<example name="test" value="123"/>' in result
+
+
+def test_to_xml_with_xml_name_func() -> None:
+    # Arrange
+    model = ExampleModelWithXmlNameFunc()
+
+    # Act
+    result = model.to_xml()
+
+    # Assert
+    assert "<EXAMPLEMODELWITHXMLNAMEFUNC/>" in result
+
+
+def test_to_xml_with_xml_name_func_none() -> None:
+    # Arrange
+    model = ExampleModelWithXmlNameFuncNone()
+
+    # Act
+    result = model.to_xml()
+
+    # Assert
+    assert "<ExampleModelWithXmlNameFuncNone/>" in result

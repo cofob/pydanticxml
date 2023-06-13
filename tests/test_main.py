@@ -54,6 +54,15 @@ class ExampleModelWithXmlNameFuncNone(XMLModel):
     __xml_name_function__ = None
 
 
+class ExampleModelEmpty(XMLModel, xml_name="test"):
+    pass
+
+
+class ExampleModelWithSameNameInAttrAndChild(XMLModel, xml_name="test2"):
+    test: str
+    test_model: ExampleModelEmpty
+
+
 # Test the `to_xml` method
 def test_to_xml() -> None:
     # Arrange
@@ -330,3 +339,16 @@ def test_to_xml_with_xml_name_func_none() -> None:
 
     # Assert
     assert "<ExampleModelWithXmlNameFuncNone/>" in result
+
+
+def test_from_xml_with_same_attr() -> None:
+    # Arrange
+    model = ExampleModelWithSameNameInAttrAndChild(
+        test="test str", test_model=ExampleModelEmpty()
+    )
+
+    # Act
+    result = ExampleModelWithSameNameInAttrAndChild.from_xml(model.to_xml())
+
+    # Assert
+    assert result.to_xml() == model.to_xml()

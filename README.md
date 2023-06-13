@@ -37,7 +37,7 @@ class AnimalCharacteristics(XMLModel):
 
 ### Converting a Model to XML
 
-You can convert a model to XML by calling the `dicttoxml()` method:
+You can convert a model to XML by calling the `to_xml()` method:
 
 ```python
 class Cat(XMLModel):
@@ -45,7 +45,7 @@ class Cat(XMLModel):
     name: str = "Kitty"
 
 cat = Cat(animal_characteristics=AnimalCharacteristics())
-print(cat.dicttoxml(indent=4))
+print(cat.to_xml(indent=4))
 ```
 
 This will output:
@@ -59,7 +59,7 @@ This will output:
 
 ### Converting XML to a Model
 
-You can convert XML to a model by calling the `fromxml()` method:
+You can convert XML to a model by calling the `from_xml()` method:
 
 ```python
 xml = """<?xml version="1.0" ?>
@@ -67,7 +67,7 @@ xml = """<?xml version="1.0" ?>
     <animalcharacteristics color="black" is_friendly="true" weight="10"/>
 </cat>
 """
-cat = Cat.fromxml(xml)
+cat = Cat.from_xml(xml)
 print(cat)
 ```
 

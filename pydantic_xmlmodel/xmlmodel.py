@@ -1,3 +1,5 @@
+"""A module that contains the XMLModel class."""
+
 from typing import Any, Callable, Optional, Type, TypeVar, no_type_check
 from xml.dom.minidom import parseString
 from xml.etree.ElementTree import Element, SubElement, fromstring, tostring
@@ -19,7 +21,8 @@ class XMLModelMeta(ModelMetaclass):
 
     @no_type_check
     def __new__(cls, name, bases, attrs, **kwargs):
-        """Adds the following class attributes to XMLModel:
+        """Add the following class attributes to XMLModel.
+
         - xml_name: The name of the XML element. If not specified, the name of the class is used.
         """
         xml_name = kwargs.pop("xml_name", None)
@@ -33,7 +36,7 @@ class XMLModel(BaseModel, metaclass=XMLModelMeta):
     """A base class for XML models.
 
     It's useful for converting a model to XML string (e.g. for libvirt XML manifests). It allows you to specify the name of the XML element and its content
-    and supports nested XML elements. See `XMLModel.dicttoxml()` for examples.
+    and supports nested XML elements. See `XMLModel.to_xml()` for examples.
 
     It's a subclass of `pydantic.BaseModel` and can be used as a regular model (and can be nested in other models).
 
@@ -69,9 +72,16 @@ class XMLModel(BaseModel, metaclass=XMLModelMeta):
     __xml_content__: Optional[str] = None
     """The content of the XML element inside `<element>{{__xml_content__}}</element>`. If not specified, the element will not have any content."""
 
+    def __init__(self, **data: Any) -> None:
+        """Initialize the model."""
+        xml_content = data.pop("__xml_content__", None)
+        super().__init__(**data)
+        if xml_content is not None:
+            object.__setattr__(self, "__xml_content__", xml_content)
+
     @classmethod
     def _get_xml_name(cls) -> str:
-        """A method that returns the name of the XML element."""
+        """Return the name of the XML element."""
         if cls.__xml_name__ is not None:
             return cls.__xml_name__
         else:
@@ -79,10 +89,10 @@ class XMLModel(BaseModel, metaclass=XMLModelMeta):
                 return cls.__xml_name_function__(cls.__name__)
             return cls.__name__
 
-    def dicttoxml(
+    def to_xml(
         self, indent: Optional[int] = None, include_xml_version: bool = True
     ) -> str:
-        """Converts the model to XML string.
+        """Convert the model to XML string.
 
         Args:
             indent: If specified, the XML will be indented with the specified number of spaces.
@@ -103,17 +113,15 @@ class XMLModel(BaseModel, metaclass=XMLModelMeta):
             >>> Cat(
             ...     animal_characteristics=AnimalCharacteristics(),
             ...     name="Kitty"
-            ... ).dicttoxml(indent=4)
-            \"\"\"
+            ... ).to_xml(indent=4)
             <?xml version="1.0" ?>
             <cat name="Kitty">
                 <animal_characteristics color="black" is_friendly="true" weight="10"/>
             </cat>
-            \"\"\"
         """
 
         def to_xml(e: Element, obj: Any) -> None:
-            """Converts the model to XML recursively."""
+            """Convert the model to XML recursively."""
             # Iterate over the fields of the model and convert them to XML
             for field, _ in obj.dict().items():
                 # We skip the __xml_content__ field because we handle it separately
@@ -156,6 +164,7 @@ class XMLModel(BaseModel, metaclass=XMLModelMeta):
             # See https://stackoverflow.com/a/65516230
             xml = xml.childNodes[0]
 
+        xml_str: str
         if indent is not None:
             xml_str = xml.toprettyxml(indent=" " * indent)
         else:
@@ -164,8 +173,8 @@ class XMLModel(BaseModel, metaclass=XMLModelMeta):
         return xml_str
 
     @classmethod
-    def fromxml(cls: Type[T], xml: str) -> T:
-        """Converts XML string to a model.
+    def from_xml(cls: Type[T], xml: str) -> T:
+        """Convert XML string to a model.
 
         Args:
             xml: The XML string.
@@ -183,12 +192,12 @@ class XMLModel(BaseModel, metaclass=XMLModelMeta):
             ...     animal_characteristics: AnimalCharacteristics
             ...     name: str = "Kitty"
             ...
-            >>> cat = Cat.fromxml(\"\"\"
+            >>> cat = Cat.from_xml('''
             ... <?xml version="1.0" ?>
             ... <cat name="Kitty">
             ...     <animal_characteristics color="black" is_friendly="true" weight="10"/>
             ... </cat>
-            ... \"\"\")
+            ... ''')
             >>> cat
             Cat(animal_characteristics=AnimalCharacteristics(color='black', weight=10, is_friendly=True), name='Kitty')
         """
@@ -232,3 +241,7 @@ class XMLModel(BaseModel, metaclass=XMLModelMeta):
 
         root = fromstring(xml)
         return from_element(root, cls)  # type: ignore
+
+    def set_xml_content(self, value: Optional[str]) -> None:
+        """Set the content of the XML element."""
+        object.__setattr__(self, "__xml_content__", value)

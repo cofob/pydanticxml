@@ -1,3 +1,4 @@
+from typing import List
 from xml.etree.ElementTree import ParseError
 
 import pytest
@@ -76,7 +77,7 @@ class XmlContentListInnnerModel(XMLModel, xml_name="test_inner"):
 
 
 class XmlContentListModel(XMLModel, xml_name="test"):
-    xml_content: list[XmlContentListInnnerModel]
+    xml_content: List[XmlContentListInnnerModel]
 
 
 class XmlAttrList1Model(XMLModel, xml_name="list1"):
@@ -88,14 +89,14 @@ class XmlAttrList2Model(XMLModel, xml_name="list2"):
 
 
 class XmlAttrListModel(XMLModel, xml_name="test"):
-    list1: list[XmlAttrList1Model]
-    list2: list[XmlAttrList2Model]
+    list1: List[XmlAttrList1Model]
+    list2: List[XmlAttrList2Model]
 
 
 class XmlAttrListAndContentModel(XMLModel, xml_name="test"):
-    xml_content: list[XmlContentListInnnerModel]
-    list1: list[XmlAttrList1Model]
-    list2: list[XmlAttrList2Model]
+    xml_content: List[XmlContentListInnnerModel]
+    list1: List[XmlAttrList1Model]
+    list2: List[XmlAttrList2Model]
 
 
 def test_xml_attr_and_content_list() -> None:

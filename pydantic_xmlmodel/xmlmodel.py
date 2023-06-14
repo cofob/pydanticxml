@@ -151,6 +151,9 @@ class XMLModel(BaseModel, metaclass=XMLModelMeta):
         # Convert the model to XML recursively
         to_xml_innner(root, self)
         # Convert the XML element to string
+        #
+        # I know it's not the best way to do it, but it's the only way I found to convert
+        # the Element to Document
         xml = parseString(tostring(root, encoding="unicode"))
 
         if not include_xml_version:

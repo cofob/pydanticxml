@@ -45,7 +45,7 @@ class XMLModel(BaseModel, metaclass=XMLModelMeta):
     It adds the following class attributes to XMLModel:
         - `__xml_name__`: The name of the XML element. If not specified, the name of the class is used.
         - `__xml_name_function__`: A function that used if `__xml_name__` is not specified.
-        - `__xml_content__`: The content of the XML element inside `<element>{{__xml_content__}}</element>`. If not specified, the element will not have any content.
+        - `xml_content`: The content of the XML element inside `<element>{{xml_content}}</element>`. If not specified, the element will not have any content.
     """
 
     __xml_name__: Optional[str] = None
@@ -69,15 +69,8 @@ class XMLModel(BaseModel, metaclass=XMLModelMeta):
         'EXAMPLESCHEMA'
     """
 
-    __xml_content__: Optional[str] = None
-    """The content of the XML element inside `<element>{{__xml_content__}}</element>`. If not specified, the element will not have any content."""
-
-    def __init__(self, **data: Any) -> None:
-        """Initialize the model."""
-        xml_content = data.pop("__xml_content__", None)
-        super().__init__(**data)
-        if xml_content is not None:
-            object.__setattr__(self, "__xml_content__", xml_content)
+    xml_content: Optional[Any] = None
+    """The content of the XML element inside `<element>{{xml_content}}</element>`. If not specified, the element will not have any content."""
 
     @classmethod
     def _get_xml_name(cls) -> str:
@@ -124,8 +117,8 @@ class XMLModel(BaseModel, metaclass=XMLModelMeta):
             """Convert the model to XML recursively."""
             # Iterate over the fields of the model and convert them to XML
             for field, _ in obj.dict().items():
-                # We skip the __xml_content__ field because we handle it separately
-                if field == "__xml_content__":
+                # We skip the xml_content field because we handle it separately
+                if field == "xml_content":
                     continue
                 # We get the value of the field using getattr() because the we need subclass of BaseModel, not just dict
                 value = getattr(obj, field)
@@ -150,8 +143,8 @@ class XMLModel(BaseModel, metaclass=XMLModelMeta):
                     # Add the attribute to the XML element
                     e.set(name, str(value))
             # If the model has content, we add it to the XML element
-            if isinstance(obj, XMLModel) and obj.__xml_content__ is not None:
-                e.text = obj.__xml_content__
+            if isinstance(obj, XMLModel) and obj.xml_content is not None:
+                e.text = str(obj.xml_content)
 
         # Create the root XML element
         root = Element(self._get_xml_name())
@@ -205,6 +198,8 @@ class XMLModel(BaseModel, metaclass=XMLModelMeta):
         def from_element(element: Element, model: Type[BaseModel]) -> Any:
             data = {}
             for field in model.__fields__:
+                if field == "xml_content":
+                    continue
                 field_type = model.__annotations__[field]
                 if issubclass(field_type, XMLModel):
                     xml_name = field_type._get_xml_name()
@@ -226,18 +221,13 @@ class XMLModel(BaseModel, metaclass=XMLModelMeta):
                         else:
                             data[field] = child.text or ""
 
+            # Set the content of the XML element
+            data["xml_content"] = element.text or ""
+
             # Convert the data to the model
             out = model(**data)
-
-            # Set the content of the XML element
-            if isinstance(out, XMLModel):
-                object.__setattr__(out, "__xml_content__", element.text)
 
             return out
 
         root = fromstring(xml)
         return from_element(root, cls)  # type: ignore
-
-    def set_xml_content(self, value: Optional[str]) -> None:
-        """Set the content of the XML element."""
-        object.__setattr__(self, "__xml_content__", value)

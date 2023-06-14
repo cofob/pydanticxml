@@ -70,7 +70,7 @@ print(cat)
 This will output:
 
 ```python
-animal_characteristics=AnimalCharacteristics(color='black', weight=10, is_friendly=True, __xml_content__=None) name='Kitty' __xml_content__='\n    '
+animal_characteristics=AnimalCharacteristics(color='black', weight=10, is_friendly=True, xml_content=None) name='Kitty' xml_content='\n    '
 ```
 
-*(Note that the `__xml_content__` attribute is not part of the model. It is used to store the XML content, like this `<element> xml_content <other_element /></element>`)*
+*(Note that the `xml_content` attribute is not part of the model. It is used to store the XML content, like this `<element> xml_content <other_element /></element>`)*

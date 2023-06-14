@@ -14,7 +14,7 @@ class ExampleModel(XMLModel):
 
 class ExampleModelWithContent(XMLModel):
     __xml_name__ = "example"
-    __xml_content__ = "content"
+    xml_content: str = "content"
     name: str
     value: int
 
@@ -132,13 +132,13 @@ def test_xml_content_load() -> None:
     model = ExampleModelWithContent.from_xml(xml)
 
     # Assert
-    assert model.__xml_content__ == "content modified"
+    assert model.xml_content == "content modified"
 
 
 def test_xml_content_set_init() -> None:
     # Arrange
     model = ExampleModelWithContent(
-        name="test", value=123, __xml_content__="content modified"
+        name="test", value=123, xml_content="content modified"
     )
 
     # Act
@@ -154,7 +154,7 @@ def test_xml_content_set_init() -> None:
 def test_xml_content_set() -> None:
     # Arrange
     model = ExampleModelWithContent(name="test", value=123)
-    model.set_xml_content("content modified")
+    model.xml_content = "content modified"
 
     # Act
     result = model.to_xml()

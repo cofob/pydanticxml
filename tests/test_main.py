@@ -1,7 +1,7 @@
 from xml.etree.ElementTree import ParseError
 
 import pytest
-from pydantic import BaseModel, ValidationError, Field
+from pydantic import BaseModel, Field, ValidationError
 
 from pydantic_xmlmodel.xmlmodel import XMLModel
 

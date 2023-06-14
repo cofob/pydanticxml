@@ -2,6 +2,16 @@
 
 PydanticXML is a Python library that provides a way to convert Pydantic models to XML and vice versa. It is built on top of the Pydantic library and extends it with XML-specific functionality.
 
+## Features
+
+- Convert Pydantic models to XML and vice versa
+- Support for XML attributes, elements, content, **lists**.
+- Compatible with most Pydantic features (e.g. default values, validators, `Field` etc.)
+- Very easy to use. Extends Pydantic's API with only a few methods.
+- Has no dependencies other than Pydantic
+- Have a good docs in the source code
+- Fully tested
+
 ## Installation
 
 You can install PydanticXML with pip:

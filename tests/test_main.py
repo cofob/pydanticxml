@@ -71,6 +71,138 @@ class XmlContentNonStrTypeModel(XMLModel, xml_name="test"):
     xml_content: int
 
 
+class XmlContentListInnnerModel(XMLModel, xml_name="test_inner"):
+    xml_content: str
+
+
+class XmlContentListModel(XMLModel, xml_name="test"):
+    xml_content: list[XmlContentListInnnerModel]
+
+
+class XmlAttrList1Model(XMLModel, xml_name="list1"):
+    xml_content: str = ""
+
+
+class XmlAttrList2Model(XMLModel, xml_name="list2"):
+    xml_content: str = ""
+
+
+class XmlAttrListModel(XMLModel, xml_name="test"):
+    list1: list[XmlAttrList1Model]
+    list2: list[XmlAttrList2Model]
+
+
+class XmlAttrListAndContentModel(XMLModel, xml_name="test"):
+    xml_content: list[XmlContentListInnnerModel]
+    list1: list[XmlAttrList1Model]
+    list2: list[XmlAttrList2Model]
+
+
+def test_xml_attr_and_content_list() -> None:
+    # Arrange
+    model = XmlAttrListAndContentModel(
+        xml_content=[XmlContentListInnnerModel(xml_content=str(i)) for i in range(3)],
+        list1=[XmlAttrList1Model(xml_content=str(i)) for i in range(3)],
+        list2=[XmlAttrList2Model(xml_content=str(i)) for i in range(3)],
+    )
+
+    # Act
+    result = model.to_xml()
+
+    # Assert
+    assert (
+        "<test><list1>0</list1><list1>1</list1><list1>2</list1><list2>0</list2><list2>1</list2><list2>2</list2><test_inner>0</test_inner><test_inner>1</test_inner><test_inner>2</test_inner></test>"
+        in result
+    )
+
+
+def test_xml_attr_and_content_list_load() -> None:
+    # Arrange
+    xml = "<test><list1>0</list1><list1>1</list1><list1>2</list1><list2>0</list2><list2>1</list2><list2>2</list2><test_inner>0</test_inner><test_inner>1</test_inner><test_inner>2</test_inner></test>"
+
+    # Act
+    model = XmlAttrListAndContentModel.from_xml(xml)
+
+    # Assert
+    assert len(model.list1) == 3
+    assert model.list1[0].xml_content == "0"
+    assert model.list1[1].xml_content == "1"
+    assert model.list1[2].xml_content == "2"
+    assert len(model.list2) == 3
+    assert model.list2[0].xml_content == "0"
+    assert model.list2[1].xml_content == "1"
+    assert model.list2[2].xml_content == "2"
+    assert len(model.xml_content) == 3
+    assert model.xml_content[0].xml_content == "0"
+    assert model.xml_content[1].xml_content == "1"
+    assert model.xml_content[2].xml_content == "2"
+
+
+def test_xml_attr_list() -> None:
+    # Arrange
+    model = XmlAttrListModel(
+        list1=[XmlAttrList1Model(xml_content=str(i)) for i in range(3)],
+        list2=[XmlAttrList2Model(xml_content=str(i)) for i in range(3)],
+    )
+
+    # Act
+    result = model.to_xml()
+
+    # Assert
+    assert (
+        "<test><list1>0</list1><list1>1</list1><list1>2</list1><list2>0</list2><list2>1</list2><list2>2</list2></test>"
+        in result
+    )
+
+
+def test_xml_attr_list_load() -> None:
+    # Arrange
+    xml = "<test><list1>0</list1><list1>1</list1><list1>2</list1><list2>0</list2><list2>1</list2><list2>2</list2></test>"
+
+    # Act
+    model = XmlAttrListModel.from_xml(xml)
+
+    # Assert
+    assert len(model.list1) == 3
+    assert model.list1[0].xml_content == "0"
+    assert model.list1[1].xml_content == "1"
+    assert model.list1[2].xml_content == "2"
+    assert len(model.list2) == 3
+    assert model.list2[0].xml_content == "0"
+    assert model.list2[1].xml_content == "1"
+    assert model.list2[2].xml_content == "2"
+
+
+def test_xml_content_list() -> None:
+    # Arrange
+    model = XmlContentListModel(
+        xml_content=[XmlContentListInnnerModel(xml_content=str(i)) for i in range(3)]
+    )
+
+    # Act
+    result = model.to_xml()
+
+    # Assert
+    assert (
+        "<test><test_inner>0</test_inner><test_inner>1</test_inner><test_inner>2</test_inner></test>"
+        in result
+    )
+
+
+def test_xml_content_list_load() -> None:
+    # Arrange
+    xml = "<test><test_inner>0</test_inner><test_inner>1</test_inner><test_inner>2</test_inner></test>"
+
+    # Act
+    model = XmlContentListModel.from_xml(xml)
+
+    # Assert
+    assert len(model.xml_content) == 3
+    assert model.xml_content[0].xml_content == "0"
+    assert model.xml_content[1].xml_content == "1"
+    assert model.xml_content[2].xml_content == "2"
+
+
 def test_xml_content_rename() -> None:
     # Arrange
     model = XmlContentRenameModel(test="test")
@@ -282,7 +414,6 @@ def test_to_xml_with_indent() -> None:
 
     # Act
     result = model.to_xml(indent=2)
-    print(result)
 
     # Assert
     assert (

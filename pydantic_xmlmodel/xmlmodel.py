@@ -209,12 +209,12 @@ class XMLModel(BaseModel, metaclass=XMLModelMeta):
                 else:
                     xml_name = (
                         model.__fields__[field].field_info.extra.get("__xml_name__")
-                        or field
+                        or model.__fields__[field].alias
                     )
 
                 # Get the value of the field
                 if xml_name in element.attrib and not issubclass(field_type, BaseModel):
-                    data[field] = element.attrib[xml_name]
+                    data[xml_name] = element.attrib[xml_name]
                 # If the field is a subelement, we convert it to XML recursively
                 else:
                     child = element.find(xml_name)
@@ -224,8 +224,13 @@ class XMLModel(BaseModel, metaclass=XMLModelMeta):
                         else:
                             data[field] = child.text or ""
 
+            # Handle the xml_content field
             # Set the content of the XML element
-            data["xml_content"] = element.text or ""
+            xml_content_meta = model.__fields__.get("xml_content")
+            if xml_content_meta is not None:
+                data[xml_content_meta.alias] = element.text or ""
+            else:
+                data["xml_content"] = element.text or ""
 
             # Convert the data to the model
             out = model(**data)

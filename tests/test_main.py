@@ -1,7 +1,7 @@
 from xml.etree.ElementTree import ParseError
 
 import pytest
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel, ValidationError, Field
 
 from pydantic_xmlmodel.xmlmodel import XMLModel
 
@@ -61,6 +61,58 @@ class ExampleModelEmpty(XMLModel, xml_name="test"):
 class ExampleModelWithSameNameInAttrAndChild(XMLModel, xml_name="test2"):
     test: str
     test_model: ExampleModelEmpty
+
+
+class XmlContentRenameModel(XMLModel, xml_name="testmodel"):
+    xml_content: str = Field(alias="test")
+
+
+class XmlContentNonStrTypeModel(XMLModel, xml_name="test"):
+    xml_content: int
+
+
+def test_xml_content_rename() -> None:
+    # Arrange
+    model = XmlContentRenameModel(test="test")
+
+    # Act
+    result = model.to_xml()
+
+    # Assert
+    assert "<testmodel>test</testmodel>" in result
+
+
+def test_xml_content_rename_load() -> None:
+    # Arrange
+    xml = "<testmodel>test</testmodel>"
+
+    # Act
+    model = XmlContentRenameModel.from_xml(xml)
+
+    # Assert
+    assert model.xml_content == "test"
+
+
+def test_xml_content_non_str_type() -> None:
+    # Arrange
+    model = XmlContentNonStrTypeModel(xml_content=1)
+
+    # Act
+    result = model.to_xml()
+
+    # Assert
+    assert "<test>1</test>" in result
+
+
+def test_xml_content_non_str_type_load() -> None:
+    # Arrange
+    xml = "<test>1</test>"
+
+    # Act
+    model = XmlContentNonStrTypeModel.from_xml(xml)
+
+    # Assert
+    assert model.xml_content == 1
 
 
 # Test the `to_xml` method

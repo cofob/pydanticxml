@@ -1,6 +1,6 @@
 """A module that contains the XMLModel class."""
 
-from typing import Any, Callable, Optional, Type, TypeVar, no_type_check
+from typing import Any, Callable, List, Optional, Type, TypeVar, no_type_check
 from xml.dom.minidom import parseString
 from xml.etree.ElementTree import Element, SubElement, fromstring, tostring
 
@@ -237,7 +237,7 @@ class XMLModel(BaseModel, metaclass=XMLModelMeta):
         """
 
         def from_element(element: Element, model: Type[BaseModel]) -> Any:
-            data: dict[str, Any] = {}
+            data: Dict[str, Any] = {}
             for field in model.__fields__:
                 if field == "xml_content":
                     continue

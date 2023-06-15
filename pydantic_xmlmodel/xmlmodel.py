@@ -11,6 +11,14 @@ from pydantic.main import ModelMetaclass
 T = TypeVar("T", bound="XMLModel")
 
 
+def _issubclass_safe(cls: Any, classinfo: Any) -> bool:
+    """Safe version of issubclass that doesn't raise an exception if the first argument is not a class."""
+    try:
+        return issubclass(cls, classinfo)
+    except TypeError:
+        return False
+
+
 class XMLModelMeta(ModelMetaclass):
     """A metaclass for XMLModel.
 
@@ -135,7 +143,7 @@ class XMLModel(BaseModel, metaclass=XMLModelMeta):
                     to_xml_innner(sub, value)
                 elif obj.__fields__[field].sub_fields is not None:
                     # If the field is a list-like field but not a list of BaseModel, we raise an error
-                    if not issubclass(
+                    if not _issubclass_safe(
                         obj.__fields__[field].sub_fields[0].type_, BaseModel
                     ):
                         raise ValueError(
@@ -165,18 +173,17 @@ class XMLModel(BaseModel, metaclass=XMLModelMeta):
             if isinstance(obj, XMLModel) and obj.xml_content is not None:
                 xml_content_field = obj.__fields__["xml_content"]
                 # if field is a list-like field but not a list of BaseModel, we raise an error
-                if xml_content_field.sub_fields is not None and not issubclass(
+                if xml_content_field.sub_fields is not None and not _issubclass_safe(
                     xml_content_field.sub_fields[0].type_, BaseModel
                 ):
                     raise ValueError(
-                        f"xml_content field of {obj.__class__.__name__} must be a List[BaseModel] "
-                        f"but got {xml_content_field.sub_fields[0].type_.__name__}"
+                        f"xml_content field of {obj.__class__.__name__} must be a List[BaseModel]"
                     )
                 # if field is a list-like field, we add each item as a separate XML element
                 if xml_content_field.sub_fields is not None:
                     type_ = xml_content_field.sub_fields[0].type_
                     name = type_.__name__
-                    if issubclass(type_, XMLModel):
+                    if _issubclass_safe(type_, XMLModel):
                         name = type_._get_xml_name()
                     for item in obj.xml_content:
                         sub = SubElement(e, name)
@@ -252,18 +259,18 @@ class XMLModel(BaseModel, metaclass=XMLModelMeta):
                 if is_list_like:
                     type_ = sub_fields[0].type_
                     field_info = sub_fields[0].field_info
-                    if not issubclass(type_, BaseModel):
+                    if not _issubclass_safe(type_, BaseModel):
                         raise ValueError(
                             f"Field {field} is a list-like field but not a list of BaseModel"
                         )
-                    if issubclass(type_, XMLModel):
+                    if _issubclass_safe(type_, XMLModel):
                         xml_name = type_._get_xml_name()
                     # This is needed if we load a model with BaseModel
                     # But at the moment, it's not possible to load a model with BaseModel
                     # So we comment this part
                     # else:
                     #     xml_name = field_info.extra.get("__xml_name__")
-                elif issubclass(field_type, XMLModel):
+                elif _issubclass_safe(field_type, XMLModel):
                     xml_name = field_type._get_xml_name()
                 else:
                     xml_name = (
@@ -272,7 +279,9 @@ class XMLModel(BaseModel, metaclass=XMLModelMeta):
                     )
 
                 # Get the value of the field
-                if xml_name in element.attrib and not issubclass(field_type, BaseModel):
+                if xml_name in element.attrib and not _issubclass_safe(
+                    field_type, BaseModel
+                ):
                     data[xml_name] = element.attrib[xml_name]
                 # If the field is a list-like field, we convert each XML element to a BaseModel
                 elif is_list_like:
@@ -283,7 +292,7 @@ class XMLModel(BaseModel, metaclass=XMLModelMeta):
                 else:
                     child_find = element.find(xml_name)
                     if child_find is not None:
-                        if issubclass(field_type, BaseModel):
+                        if _issubclass_safe(field_type, BaseModel):
                             data[field] = from_element(child_find, field_type)
 
             # Handle the xml_content field
@@ -292,14 +301,15 @@ class XMLModel(BaseModel, metaclass=XMLModelMeta):
             xml_content_data: Any
             # if the field is a list-like field, we add each item as a separate XML element
             if xml_content_meta is not None and xml_content_meta.sub_fields is not None:
-                if not issubclass(xml_content_meta.sub_fields[0].type_, BaseModel):
+                if not _issubclass_safe(
+                    xml_content_meta.sub_fields[0].type_, BaseModel
+                ):
                     raise ValueError(
-                        f"xml_content field of {model.__name__} must be a List[BaseModel] "
-                        f"but got {xml_content_meta.sub_fields[0].type_.__name__}"
+                        f"xml_content field of {model.__name__} must be a List[BaseModel]"
                     )
                 xml_content_data = []
                 name = xml_content_meta.sub_fields[0].type_.__name__
-                if issubclass(xml_content_meta.sub_fields[0].type_, XMLModel):
+                if _issubclass_safe(xml_content_meta.sub_fields[0].type_, XMLModel):
                     name = xml_content_meta.sub_fields[0].type_._get_xml_name()
                 for child in element:
                     if child.tag != name:

@@ -1,10 +1,12 @@
 """A module that contains the XMLModel class."""
 
-from typing import Any, Callable, Dict, Optional, Type, TypeVar, no_type_check
+from typing import (Any, Callable, Dict, List, Optional, Type, TypeVar,
+                    no_type_check)
 from xml.dom.minidom import parseString
 from xml.etree.ElementTree import Element, SubElement, fromstring, tostring
 
 from pydantic import BaseModel
+from pydantic.fields import ModelField
 from pydantic.main import ModelMetaclass
 
 T = TypeVar("T", bound="XMLModel")
@@ -242,13 +244,13 @@ class XMLModel(BaseModel, metaclass=XMLModelMeta):
                 if field == "xml_content":
                     continue
                 field_type = model.__annotations__[field]
-                is_list_like = model.__fields__[field].sub_fields is not None
+                is_list_like = False
+                # mypy doesn't understand that sub_fields is not None if is_list_like is True
+                # so we use a typing and "or []" to tell mypy that sub_fields is not None
+                sub_fields: List[ModelField] = model.__fields__[field].sub_fields or []
+                if sub_fields:
+                    is_list_like = True
                 if is_list_like:
-                    sub_fields = model.__fields__[field].sub_fields
-                    if not sub_fields:
-                        raise ValueError(
-                            f"Field {field} is a list-like field but it's empty"
-                        )
                     type_ = sub_fields[0].type_
                     field_info = sub_fields[0].field_info
                     if not issubclass(type_, BaseModel):
@@ -257,8 +259,11 @@ class XMLModel(BaseModel, metaclass=XMLModelMeta):
                         )
                     if issubclass(type_, XMLModel):
                         xml_name = type_._get_xml_name()
-                    else:
-                        xml_name = field_info.extra.get("__xml_name__")
+                    # This is needed if we load a model with BaseModel
+                    # But at the moment, it's not possible to load a model with BaseModel
+                    # So we comment this part
+                    # else:
+                    #     xml_name = field_info.extra.get("__xml_name__")
                 elif issubclass(field_type, XMLModel):
                     xml_name = field_type._get_xml_name()
                 else:
@@ -281,12 +286,10 @@ class XMLModel(BaseModel, metaclass=XMLModelMeta):
                     if child_find is not None:
                         if issubclass(field_type, BaseModel):
                             data[field] = from_element(child_find, field_type)
-                        else:
-                            data[field] = child_find.text or ""
 
             # Handle the xml_content field
             # Set the content of the XML element
-            xml_content_meta = model.__fields__.get("xml_content")
+            xml_content_meta = model.__fields__["xml_content"]
             xml_content_data: Any
             # if the field is a list-like field, we add each item as a separate XML element
             if xml_content_meta is not None and xml_content_meta.sub_fields is not None:
@@ -308,10 +311,7 @@ class XMLModel(BaseModel, metaclass=XMLModelMeta):
             # else, we add the content as a text
             else:
                 xml_content_data = element.text or ""
-            if xml_content_meta is not None:
-                data[xml_content_meta.alias] = xml_content_data
-            else:
-                data["xml_content"] = xml_content_data
+            data[xml_content_meta.alias] = xml_content_data
 
             # Convert the data to the model
             out = model(**data)

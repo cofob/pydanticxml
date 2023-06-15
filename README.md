@@ -10,7 +10,7 @@ PydanticXML is a Python library that provides a way to convert Pydantic models t
 - Very easy to use. Extends Pydantic's API with only a few methods.
 - Has no dependencies other than Pydantic
 - Have a good docs in the source code
-- Fully tested
+- Fully tested (100% coverage)
 
 ## Installation
 

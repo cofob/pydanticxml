@@ -41,11 +41,11 @@ class XmlContentListNonBaseModel(XMLModel, xml_name="test"):
 
 
 class XmlListEmptyModel(XMLModel, xml_name="test"):
-    data: List
+    data: List  # type: ignore
 
 
 class XmlContentListEmptyModel(XMLModel, xml_name="test"):
-    xml_content: List
+    xml_content: List  # type: ignore
 
 
 def test_xml_list_empty() -> None:
@@ -66,7 +66,7 @@ def test_xml_list_empty_load() -> None:
         XmlListEmptyModel.from_xml(xml)
 
 
-def test_xml_content_list_empty():
+def test_xml_content_list_empty() -> None:
     # Arrange
     model = XmlContentListEmptyModel(xml_content=[1])
 
@@ -75,7 +75,7 @@ def test_xml_content_list_empty():
         model.to_xml()
 
 
-def test_xml_content_list_empty_load():
+def test_xml_content_list_empty_load() -> None:
     # Arrange
     xml = "<test><data>1</data></test>"
 

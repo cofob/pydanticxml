@@ -258,7 +258,8 @@ class XMLModel(BaseModel, metaclass=XMLModelMeta):
                     is_list_like = True
                 if is_list_like:
                     type_ = sub_fields[0].type_
-                    field_info = sub_fields[0].field_info
+                    # See below for the explanation of this comment
+                    # field_info = sub_fields[0].field_info
                     if not _issubclass_safe(type_, BaseModel):
                         raise ValueError(
                             f"Field {field} is a list-like field but not a list of BaseModel"

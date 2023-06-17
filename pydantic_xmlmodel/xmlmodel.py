@@ -28,7 +28,6 @@ class XMLModelMeta(ModelMetaclass):
         - `__xml_name__`: The name of the XML element. If not specified, the name of the class is used.
     """
 
-    @no_type_check
     def __new__(cls, name, bases, attrs, **kwargs):
         """Add the following class attributes to XMLModel.
 

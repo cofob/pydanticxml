@@ -132,7 +132,12 @@ class XMLModel(BaseModel, metaclass=XMLModelMeta):
                 # We get the value of the field using getattr() because the we need subclass of BaseModel, not just dict
                 value = getattr(obj, field)
                 # If the value is a BaseModel, we convert it to XML recursively
-                if isinstance(value, BaseModel):
+                if (
+                    issubclass(obj.__fields__[field].type_, BaseModel)
+                    and obj.__fields__[field].sub_fields is None
+                ):
+                    if obj.__fields__[field].allow_none and value is None:
+                        continue
                     # Get the name of the XML element
                     name = value.__class__.__name__
                     if isinstance(value, XMLModel):
@@ -249,7 +254,7 @@ class XMLModel(BaseModel, metaclass=XMLModelMeta):
             for field in model.__fields__:
                 if field == "xml_content":
                     continue
-                field_type = model.__annotations__[field]
+                field_type = model.__fields__[field].type_
                 is_list_like = False
                 # mypy doesn't understand that sub_fields is not None if is_list_like is True
                 # so we use a typing and "or []" to tell mypy that sub_fields is not None

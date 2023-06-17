@@ -133,7 +133,7 @@ class XMLModel(BaseModel, metaclass=XMLModelMeta):
                 value = getattr(obj, field)
                 # If the value is a BaseModel, we convert it to XML recursively
                 if (
-                    issubclass(obj.__fields__[field].type_, BaseModel)
+                    _issubclass_safe(obj.__fields__[field].type_, BaseModel)
                     and obj.__fields__[field].sub_fields is None
                 ):
                     if obj.__fields__[field].allow_none and value is None:

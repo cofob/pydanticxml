@@ -1,6 +1,6 @@
 """A module that contains the XMLModel class."""
 
-from typing import Any, Callable, Dict, List, Optional, Type, TypeVar
+from typing import Any, Callable, Dict, List, Optional, Type, TypeVar, no_type_check
 from xml.dom.minidom import parseString
 from xml.etree.ElementTree import Element, SubElement, fromstring, tostring
 
@@ -28,6 +28,7 @@ class XMLModelMeta(ModelMetaclass):
         - `__xml_name__`: The name of the XML element. If not specified, the name of the class is used.
     """
 
+    @no_type_check
     def __new__(cls, name, bases, attrs, **kwargs):
         """Add the following class attributes to XMLModel.
 

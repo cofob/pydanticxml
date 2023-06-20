@@ -1,6 +1,6 @@
 """A module that contains the XMLModel class."""
 
-from typing import Any, Callable, Dict, List, Optional, Type, TypeVar, no_type_check
+from typing import Any, Callable, Dict, List, Optional, Type, TypeVar
 from xml.dom.minidom import parseString
 from xml.etree.ElementTree import Element, SubElement, fromstring, tostring
 

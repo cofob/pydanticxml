@@ -1,3 +1,5 @@
+from typing import Union
+
 from pydantic_xmlmodel.xmlmodel import XMLModel
 
 
@@ -6,7 +8,7 @@ class InnerModel(XMLModel, xml_name="inner"):
 
 
 class OuterModel(XMLModel, xml_name="outer"):
-    inner: InnerModel | None
+    inner: Union[InnerModel, None]
 
 
 def test_none_with_none() -> None:

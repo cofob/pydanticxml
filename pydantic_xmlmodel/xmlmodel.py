@@ -92,7 +92,10 @@ class XMLModel(BaseModel, metaclass=XMLModelMeta):
             return cls.__name__
 
     def to_xml(
-        self, indent: Optional[int] = None, include_xml_version: bool = True
+        self,
+        indent: Optional[int] = None,
+        include_xml_version: bool = True,
+        exclude_none=False,
     ) -> str:
         """Convert the model to XML string.
 
@@ -172,8 +175,9 @@ class XMLModel(BaseModel, metaclass=XMLModelMeta):
                     name = pydantic_field.name
                     if pydantic_field.alias is not None:
                         name = pydantic_field.alias
-                    # Add the attribute to the XML element
-                    e.set(name, str(value))
+                    if not (exclude_none and value is None):
+                        # Add the attribute to the XML element
+                        e.set(name, str(value))
             # If the model has content, we add it to the XML element
             if isinstance(obj, XMLModel) and obj.xml_content is not None:
                 xml_content_field = obj.__fields__["xml_content"]

@@ -95,7 +95,7 @@ class XMLModel(BaseModel, metaclass=XMLModelMeta):
         self,
         indent: Optional[int] = None,
         include_xml_version: bool = True,
-        exclude_none=False,
+        exclude_none: bool = False,
     ) -> str:
         """Convert the model to XML string.
 

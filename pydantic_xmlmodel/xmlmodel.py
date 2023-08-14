@@ -49,7 +49,7 @@ class XMLModel(BaseModel, metaclass=XMLModelMeta):
 
     It's a subclass of `pydantic.BaseModel` and can be used as a regular model (and can be nested in other models).
 
-    It's currently missing support for lists and dictionaries (it will be added as json attribute to the XML element).
+    It's currently missing support for dictionaries (it will be added as json attribute to the XML element). Lists with elements of BaseModel are supported.
 
     It adds the following class attributes to XMLModel:
         - `__xml_name__`: The name of the XML element. If not specified, the name of the class is used.
@@ -101,6 +101,8 @@ class XMLModel(BaseModel, metaclass=XMLModelMeta):
 
         Args:
             indent: If specified, the XML will be indented with the specified number of spaces.
+            include_xml_version: If True, the XML version will be included in the XML string.
+            exclude_none: If True, fields with None value will be excluded from the XML string.
 
         Returns:
             The XML string.

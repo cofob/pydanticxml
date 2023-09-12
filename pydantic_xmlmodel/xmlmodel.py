@@ -54,6 +54,7 @@ class XMLModel(BaseModel, metaclass=XMLModelMeta):
     It adds the following class attributes to XMLModel:
         - `__xml_name__`: The name of the XML element. If not specified, the name of the class is used.
         - `__xml_name_function__`: A function that used if `__xml_name__` is not specified.
+        - `__xml_namespaces__`: The namespaces of the XML element.
         - `xml_content`: The content of the XML element inside `<element>{{xml_content}}</element>`. If not specified, the element will not have any content.
     """
 
@@ -76,6 +77,17 @@ class XMLModel(BaseModel, metaclass=XMLModelMeta):
         ...
         >>> ExampleSchema._get_xml_name()
         'EXAMPLESCHEMA'
+    """
+
+    __xml_namespaces__: Dict[str, str]
+    """The namespaces of the XML element.
+
+    Example:
+        >>> class NewXMLModel(XMLModel):
+        ...     __xml_namespaces__ = {
+        ...         "test": "http://test.com"
+        ...     }
+        ...
     """
 
     xml_content: Optional[Any] = None
@@ -302,7 +314,12 @@ class XMLModel(BaseModel, metaclass=XMLModelMeta):
                         data[field].append(from_element(child, type_))
                 # If the field is a subelement, we convert it to XML recursively
                 else:
-                    child_find = element.find(xml_name)
+                    if "xmlns:" in xml_name:
+                        continue
+                    namespaces: Dict[str, str] = {}
+                    if _issubclass_safe(field_type, BaseModel):
+                        namespaces = getattr(field_type, "__xml_namespaces__", {})
+                    child_find = element.find(xml_name, namespaces=namespaces)
                     if child_find is not None:
                         if _issubclass_safe(field_type, BaseModel):
                             data[field] = from_element(child_find, field_type)

@@ -1,6 +1,5 @@
-from typing import Union
-
 from pydantic import Field
+
 from pydantic_xmlmodel.xmlmodel import XMLModel
 
 

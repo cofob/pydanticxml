@@ -166,7 +166,7 @@ def test_xml_name() -> None:
     assert "<example" in result
 
 
-def test_to_xml_with_pydantic_model() -> None:
+def test_to_xml_with_pydantic_model_2() -> None:
     # Arrange
     model = PydanticModel(name="test", value=123)
 
@@ -177,7 +177,7 @@ def test_to_xml_with_pydantic_model() -> None:
     assert '<PydanticModel name="test" value="123" />' in result
 
 
-def test_from_xml_with_pydantic_model() -> None:
+def test_from_xml_with_pydantic_model_2() -> None:
     # Arrange
     xml = '<PydanticModel name="test" value="123"/>'
 

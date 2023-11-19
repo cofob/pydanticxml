@@ -1,4 +1,7 @@
-from typing import Union
+from typing import Optional
+
+import pytest
+from pydantic import ValidationError
 
 from pydantic_xmlmodel.xmlmodel import XMLModel
 
@@ -8,7 +11,11 @@ class InnerModel(XMLModel, xml_name="inner"):
 
 
 class OuterModel(XMLModel, xml_name="outer"):
-    inner: Union[InnerModel, None]
+    inner: Optional[InnerModel] = None
+
+
+class OuterModelRequired(XMLModel, xml_name="outer"):
+    inner: Optional[InnerModel]
 
 
 def test_none_with_none() -> None:
@@ -19,7 +26,7 @@ def test_none_with_none() -> None:
     result = model.to_xml()
 
     # Assert
-    assert '<?xml version="1.0" ?><outer/>' == result
+    assert '<?xml version="1.0" ?><outer />' == result
 
 
 def test_none_filled() -> None:
@@ -30,7 +37,7 @@ def test_none_filled() -> None:
     result = model.to_xml()
 
     # Assert
-    assert '<?xml version="1.0" ?><outer><inner/></outer>' == result
+    assert '<?xml version="1.0" ?><outer><inner /></outer>' == result
 
 
 def test_none_with_none_load() -> None:
@@ -44,13 +51,21 @@ def test_none_with_none_load() -> None:
     assert model.inner is None
 
 
+def test_none_with_none_load_required() -> None:
+    # Arrange
+    xml = '<?xml version="1.0" ?><outer/>'
+
+    # Act
+    with pytest.raises(ValidationError):
+        OuterModelRequired.from_xml(xml)
+
+
 def test_none_filled_load() -> None:
     # Arrange
     xml = '<?xml version="1.0" ?><outer><inner/></outer>'
 
     # Act
     model = OuterModel.from_xml(xml)
-    print(model)
 
     # Assert
     assert model.inner is not None

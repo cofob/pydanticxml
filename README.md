@@ -4,13 +4,14 @@ PydanticXML is a Python library that provides a way to convert Pydantic models t
 
 ## Features
 
+- Based on Pydantic 2
 - Convert Pydantic models to XML and vice versa
-- Support for XML attributes, elements, content, **lists**.
-- Compatible with most Pydantic features (e.g. default values, validators, `Field` etc.)
+- Support for XML attributes, elements, content, lists.
+- Compatible with most Pydantic features (e.g. default values, aliases, validators, `Field` etc.)
 - Very easy to use. Extends Pydantic's API with only a few methods.
 - Has no dependencies other than Pydantic
-- Have a good docs in the source code
-- Fully tested (100% coverage)
+- Fully tested (almost 100% coverage)
+- Supports mypy
 
 ## Installation
 
@@ -22,20 +23,20 @@ pip install pydantic-xmlmodel
 
 ## Usage
 
-To use PydanticXML, you need to import the `XMLModel` class from the `pydanticxml` module:
+To use PydanticXML, you need to import the `BaseModelXML` class from the `pydanticxml` module:
 
 ```python
-from pydantic_xmlmodel import XMLModel
+from pydantic_xmlmodel import BaseModelXML
 ```
 
 ## Examples
 
 ### Defining a Model
 
-You can define a model by subclassing `XMLModel` and defining attributes with type annotations:
+You can define a model by subclassing `BaseModelXML` and defining attributes with type annotations:
 
 ```python
-class AnimalCharacteristics(XMLModel):
+class AnimalCharacteristics(BaseModelXML):
     color: str = "black"
     weight: int = 10
     is_friendly: bool = True
@@ -43,44 +44,37 @@ class AnimalCharacteristics(XMLModel):
 
 ### Converting a Model to XML
 
-You can convert a model to XML by calling the `to_xml()` method:
+You can convert a model to XML by calling the `model_dump_xml()` method:
 
 ```python
-class Cat(XMLModel):
+class Cat(BaseModelXML):
     animal_characteristics: AnimalCharacteristics
     name: str = "Kitty"
 
 cat = Cat(animal_characteristics=AnimalCharacteristics())
-print(cat.to_xml(indent=4))
+print(cat.model_dump_xml())
 ```
 
 This will output:
 
 ```xml
-<?xml version="1.0" ?>
-<cat name="Kitty">
-    <animalcharacteristics color="black" weight="10" is_friendly="True"/>
-</cat>
+<?xml version="1.0" ?><Cat name="Kitty"><AnimalCharacteristics color="black" weight="10" is_friendly="True" /></Cat>
 ```
 
 ### Converting XML to a Model
 
-You can convert XML to a model by calling the `from_xml()` method:
+You can convert XML to a model by calling the `model_validate_xml()` method:
 
 ```python
-xml = """<?xml version="1.0" ?>
-<cat name="Kitty">
-    <animalcharacteristics color="black" is_friendly="true" weight="10"/>
-</cat>
-"""
-cat = Cat.from_xml(xml)
+xml = '<?xml version="1.0" ?><Cat name="Kitty"><AnimalCharacteristics color="black" weight="10" is_friendly="True" /></Cat>'
+cat = Cat.model_validate_xml(xml)
 print(cat)
 ```
 
 This will output:
 
 ```python
-animal_characteristics=AnimalCharacteristics(color='black', weight=10, is_friendly=True, xml_content=None) name='Kitty' xml_content='\n    '
+xml_content=None animal_characteristics=AnimalCharacteristics(xml_content=None, color='black', weight=10, is_friendly=True) name='Kitty'
 ```
 
 *(Note that the `xml_content` attribute is not part of the model. It is used to store the XML content, like this `<element> xml_content <other_element /></element>`)*

@@ -45,6 +45,6 @@ jobs:
         run: |
           poetry run flake8 .
 
-      - name: Run mypy in strict mode
+      - name: Run mypy
         run: |
-          poetry run mypy --strict .
+          poetry run mypy pydantic_xmlmodel

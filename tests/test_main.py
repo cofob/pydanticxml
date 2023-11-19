@@ -2,8 +2,8 @@ from xml.etree.ElementTree import ParseError
 
 import pytest
 from pydantic import BaseModel, ValidationError
-from pydantic_xmlmodel.serde import model_dump_xml, model_validate_xml
 
+from pydantic_xmlmodel.serde import model_dump_xml, model_validate_xml
 from pydantic_xmlmodel.xmlmodel import BaseModelXML, XMLConfigDict, XMLModel
 
 

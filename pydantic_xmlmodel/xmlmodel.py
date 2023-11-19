@@ -1,7 +1,7 @@
 """A module that contains the XMLModel class."""
 
-from typing import Any, Optional, Type, TypeVar, no_type_check
 import warnings
+from typing import Any, Optional, Type, TypeVar, no_type_check
 
 from pydantic import BaseModel, ConfigDict
 from pydantic._internal._model_construction import ModelMetaclass

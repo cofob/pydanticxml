@@ -11,7 +11,7 @@ Example:
 """
 
 from .serde import model_dump_xml, model_validate_xml
-from .xmlmodel import XMLModel, BaseModelXML, XMLConfigDict
+from .xmlmodel import BaseModelXML, XMLConfigDict, XMLModel
 
 __all__ = [
     "XMLModel",

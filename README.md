@@ -29,6 +29,12 @@ To use PydanticXML, you need to import the `BaseModelXML` class from the `pydant
 from pydantic_xmlmodel import BaseModelXML
 ```
 
+Or if your models is not based on BaseModelXML class you can use these functions:
+
+```python
+from pydantic_xmlmodel import model_dump_xml, model_validate_xml
+```
+
 ## Examples
 
 ### Defining a Model

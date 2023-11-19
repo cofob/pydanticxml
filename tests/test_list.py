@@ -133,14 +133,14 @@ def test_xml_attr_and_content_list() -> None:
 
     # Assert
     assert (
-        "<test><list1>0</list1><list1>1</list1><list1>2</list1><list2>0</list2><list2>1</list2><list2>2</list2><test_inner>0</test_inner><test_inner>1</test_inner><test_inner>2</test_inner></test>"
+        "<test><test_inner>0</test_inner><test_inner>1</test_inner><test_inner>2</test_inner><list1>0</list1><list1>1</list1><list1>2</list1><list2>0</list2><list2>1</list2><list2>2</list2></test>"  # noqa: E501
         in result
     )
 
 
 def test_xml_attr_and_content_list_load() -> None:
     # Arrange
-    xml = "<test><list1>0</list1><list1>1</list1><list1>2</list1><list2>0</list2><list2>1</list2><list2>2</list2><test_inner>0</test_inner><test_inner>1</test_inner><test_inner>2</test_inner></test>"
+    xml = "<test><list1>0</list1><list1>1</list1><list1>2</list1><list2>0</list2><list2>1</list2><list2>2</list2><test_inner>0</test_inner><test_inner>1</test_inner><test_inner>2</test_inner></test>"  # noqa: E501
 
     # Act
     model = XmlAttrListAndContentModel.from_xml(xml)
@@ -179,7 +179,7 @@ def test_xml_attr_list() -> None:
 
 def test_xml_attr_list_load() -> None:
     # Arrange
-    xml = "<test><list1>0</list1><list1>1</list1><list1>2</list1><list2>0</list2><list2>1</list2><list2>2</list2></test>"
+    xml = "<test><list1>0</list1><list1>1</list1><list1>2</list1><list2>0</list2><list2>1</list2><list2>2</list2></test>"  # noqa: E501
 
     # Act
     model = XmlAttrListModel.from_xml(xml)

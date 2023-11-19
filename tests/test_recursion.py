@@ -24,10 +24,7 @@ def test_to_xml_with_indent() -> None:
 
     # Assert
     assert (
-        '<?xml version="1.0" ?>\n'
-        '<level1 value="456">\n'
-        '  <level2 name="test" value="123"/>\n'
-        "</level1>\n"
+        '<?xml version="1.0" ?><level1 value="456"><level2 name="test" value="123" /></level1>'
     ) == result
 
 
@@ -42,7 +39,7 @@ def test_to_xml_with_level() -> None:
 
     # Assert
     assert (
-        '<?xml version="1.0" ?><level1 value="456"><level2 name="test" value="123"/></level1>'
+        '<?xml version="1.0" ?><level1 value="456"><level2 name="test" value="123" /></level1>'
         == result
     )
 

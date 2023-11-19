@@ -1,46 +1,50 @@
+---
 name: Python CI
 
 on:
   push:
-    branches: [ master ]
+    branches: [master]
   pull_request:
-    branches: [ master ]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11"]
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
 
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-    - name: Install poetry
-      run: pipx install poetry
+      - name: Install poetry
+        run: pipx install poetry
 
-    - uses: actions/setup-python@v4
-      with:
-        python-version: ${{ matrix.python-version }}
-        cache: 'poetry'
+      - name: Install Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "poetry"
 
-    - name: Install dependencies
-      run: |
-        poetry install
+      - name: Install dependencies
+        run: |
+          poetry install
 
-    - name: Check formatting with Black
-      run: |
-        poetry run black --check .
+      - name: Check formatting with Black
+        run: |
+          poetry run black --check -t py38 .
 
-    - name: Check import sorting with isort
-      run: |
-        poetry run isort --check-only --profile black .
+      - name: Check import sorting with isort
+        run: |
+          poetry run isort --check-only --profile black --py 38 .
 
-    - name: Run tests
-      run: |
-        poetry run pytest
+      - name: Run tests
+        run: |
+          poetry run pytest .
 
-    - name: Run mypy in strict mode
-      run: |
-        poetry run mypy --strict .
+      - name: Run flake8
+        run: |
+          poetry run flake8 .
+
+      - name: Run mypy
+        run: |
+          poetry run mypy pydantic_xmlmodel

@@ -166,6 +166,29 @@ def test_xml_name() -> None:
     assert "<example" in result
 
 
+def test_to_xml_with_pydantic_model() -> None:
+    # Arrange
+    model = PydanticModel(name="test", value=123)
+
+    # Act
+    result = model_dump_xml(model)
+
+    # Assert
+    assert '<PydanticModel name="test" value="123" />' in result
+
+
+def test_from_xml_with_pydantic_model() -> None:
+    # Arrange
+    xml = '<PydanticModel name="test" value="123"/>'
+
+    # Act
+    model = model_validate_xml(PydanticModel, xml)
+
+    # Assert
+    assert model.name == "test"
+    assert model.value == 123
+
+
 # Test for empty XML
 def test_from_xml_empty_xml() -> None:
     # Arrange

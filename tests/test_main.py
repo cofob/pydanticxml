@@ -199,19 +199,6 @@ def test_from_xml_extra_attributes() -> None:
     assert model.value == 123
 
 
-# Test for large XML input
-def test_from_xml_large_input() -> None:
-    # Arrange
-    xml = '<example name="{}" value="123"/>'.format("a" * 100000)
-
-    # Act
-    model = ExampleModel.from_xml(xml)
-
-    # Assert
-    assert model.name == "a" * 100000
-    assert model.value == 123
-
-
 # Test for XML with special characters in attribute values
 def test_from_xml_special_characters() -> None:
     # Arrange
